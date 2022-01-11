@@ -79,6 +79,11 @@ ConfigKey = WheelTool
 DefaultValue = //tools/wheel_resolver
 Optional = true
 
+[PluginConfig "entrypoint_generator"]
+ConfigKey = entrypoint_generator
+DefaultValue = @self//tools/entrypoint_generator
+Optional = true
+
 [featureflags]
 PythonWheelHashing = true
 ExcludePythonRules = true
