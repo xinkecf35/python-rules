@@ -504,3 +504,59 @@ filegroup(
         ":six",
     ],
 )
+
+pip_library(
+    name = "appdirs",
+    version = "1.4.4",
+)
+
+pip_library(
+    name = "click",
+    version = "7.1.2",
+)
+
+pip_library(
+    name = "mypy-extensions",
+    version = "0.4.3",
+)
+
+pip_library(
+    name = "pathspec",
+    version = "0.8.1",
+)
+
+pip_library(
+    name = "regex",
+    version = "2020.11.13",
+)
+
+pip_library(
+    name = "toml",
+    version = "0.10.2",
+)
+
+pip_library(
+    name = "typed-ast",
+    version = "1.4.0",
+)
+
+pip_library(
+    name = "typing-extensions",
+    version = "3.7.4.3",
+)
+
+pip_library(
+    name = "black",
+    binary = True,
+    version = "20.8b1",
+    deps = [
+        ":appdirs",
+        ":click",
+        ":mypy-extensions",
+        ":pathspec",
+        ":regex",
+        ":toml",
+        ":typed-ast",
+        ":typing-extensions",
+    ],
+)

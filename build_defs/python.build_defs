@@ -357,7 +357,7 @@ def pip_library(name:str, version:str, hashes:list=None, package_name:str=None,
                 test_only:bool&testonly=False, deps:list=[], post_install_commands:list=None,
                 install_subdirectory:str=None, repo:str=None, use_pypi:bool=None, patch:str|list=None,
                 visibility:list=None, zip_safe:bool=True, licences:list=None, pip_flags:str=None,
-                strip:list=[]):
+                strip:list=[], binary:bool=False):
     """Provides a build rule for third-party dependencies to be installed by pip.
 
     Args:
@@ -378,6 +378,7 @@ def pip_library(name:str, version:str, hashes:list=None, package_name:str=None,
       licences (list): Licences this rule is subject to. Default attempts to detect from package metadata.
       pip_flags (str): List of additional flags to pass to pip.
       strip (list): Files to strip after install. Note that these are done at any level.
+      binary (bool) : Indicate that downloaded package is runnable.
     """
     pip_target_dir = "pip_install"
 
@@ -462,7 +463,7 @@ def pip_library(name:str, version:str, hashes:list=None, package_name:str=None,
         cmd += ' && find . -name METADATA -or -name PKG-INFO | grep -v "^./build/" | xargs grep -E "License ?:" | grep -v UNKNOWN | cat || true'
 
     wheel = build_rule(
-        name = name,
+        name = name if not binary else f"{name}_wheel",
         cmd = cmd,
         outs = [name + '.whl'],
         srcs = [srcs],
@@ -479,7 +480,38 @@ def pip_library(name:str, version:str, hashes:list=None, package_name:str=None,
         visibility = visibility,
     )
 
-    return wheel
+    if binary:
+        # Generate entrypoint script
+        main_name = f"{name}_entrypoint"
+        output_file = f"{main_name}.py"
+
+        find_entry_points_txt = "find . -name entry_points.txt"
+
+        # Need some kind of build rule / filegroup to actually extract evaluate this file
+        entry_points_cmd = f"$TOOLS_ENTRY_POINT_GEN --write={output_file} \\$({find_entry_points_txt})"
+
+        entry_points_main = build_rule(
+            name = main_name,
+            tag = "entry_point_main",
+            cmd = entry_points_cmd,
+            outs = [output_file],
+            building_description = 'Building Entry Points...',
+            tools = {
+                'entry_point_gen': [CONFIG.PYTHON.ENTRYPOINT_GEN_TOOL],
+            },
+            srcs = [srcs],
+        )
+
+        return python_binary(
+            name = name,
+            main = entry_points_main,
+            deps = [wheel] + deps,
+            zip_safe = zip_safe,
+            labels = ['py', 'pip:' + package_name] + (['py:zip-unsafe'] if not zip_safe else []),
+        )   
+
+    else:
+        return wheel
 
 def python_wheel(name:str, version:str, hashes:list=None, package_name:str=None, outs:list=None,
                  post_install_commands:list=None, patch:str|list=None, licences:list=None,

@@ -79,7 +79,7 @@ ConfigKey = WheelTool
 DefaultValue = //tools/wheel_resolver
 Optional = true
 
-[PluginConfig "entrypoint_generator"]
+[PluginConfig "entrypoint_gen_tool"]
 ConfigKey = EntrypointGenTool
 DefaultValue = @self//tools/entrypoint_generator
 Optional = true
