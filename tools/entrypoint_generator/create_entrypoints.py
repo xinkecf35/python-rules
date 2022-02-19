@@ -36,12 +36,16 @@ def print_stderr(value: str):
 
 
 def read_entry_point_file(filename: str):
-    """Attempts to read a entry_points.txt; returns a ConfigParser object"""
+    """
+    Attempts to read a entry_points.txt; returns a ConfigParser object
+
+    TODO: need to fix up path to get the absolute path
+    """
 
     potential_path = Path(filename)
 
     if not potential_path.exists:
-        sys.stderr(f"path {filename} does not exists")
+        print_stderr(f"path {filename} does not exists")
         sys.exit(2)
 
     entry_point_config = ConfigParser()
